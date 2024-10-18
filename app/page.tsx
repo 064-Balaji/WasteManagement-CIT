@@ -53,8 +53,6 @@ export default async function Home() {
         },
       });
     }
-
-    redirect("/dashboard");
   };
 
   return <UserTypeForm handleSubmit={handleFormSubmit} />;

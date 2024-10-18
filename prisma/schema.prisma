@@ -51,13 +51,14 @@ model Account {
 }
 
 model Individual {
-  id      String  @id @default(cuid())
-  name    String?
-  email   String? @unique
-  phoneNo String
-  address String
-  city    String
-  pinCode String
+  id       String     @id @default(cuid())
+  name     String?
+  email    String?    @unique
+  phoneNo  String
+  address  String
+  city     String
+  pinCode  String
+  resource Resource[]
 }
 
 model Business {
@@ -69,4 +70,16 @@ model Business {
   city          String
   pinCode       String
   typeofProduct String
+}
+
+model Resource {
+  id            String     @id @default(cuid())
+  name          String
+  description   String
+  quantity      Int
+  productType   String
+  providerEmail String
+  image         String[]
+  individual    Individual @relation(references: [email], fields: [providerEmail])
+  status        String
 }
