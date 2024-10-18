@@ -49,3 +49,24 @@ model Account {
   @@unique([provider, providerAccountId])
   @@index([userId])
 }
+
+model Individual {
+  id      String  @id @default(cuid())
+  name    String?
+  email   String? @unique
+  phoneNo String
+  address String
+  city    String
+  pinCode String
+}
+
+model Business {
+  id            String  @id @default(cuid())
+  name          String?
+  email         String? @unique
+  phoneNo       String
+  address       String
+  city          String
+  pinCode       String
+  typeofProduct String
+}
