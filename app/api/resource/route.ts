@@ -14,36 +14,35 @@ export async function GET() {
 }
 
 type FormData = {
-  name: string;
+  resourceName: string;
   description: string;
   productType: string;
   quantity: number;
-  image: string[];
+  imageUrl: string;
   providerEmail: string;
 };
 
 export async function POST(req: NextRequest) {
+  const session = await auth();
   const {
     description,
-    image,
-    name,
+    imageUrl,
+    resourceName,
     productType,
-    providerEmail,
     quantity,
   }: FormData = await req.json();
-  const res = await prisma.resource
-    .create({
-      data: {
-        name,
-        description,
-        productType,
-        quantity,
-        image,
-        providerEmail,
-        status: "pending",
-      },
-    })
-    .then(() => console.log("Listed Successfully"));
-
+  console.log(resourceName, description);
+  const res = await prisma.resource.create({
+    data: {
+      name: resourceName,
+      description,
+      productType,
+      quantity: Number(quantity),
+      image: imageUrl,
+      providerEmail: session?.user.email!,
+      status: "pending",
+    },
+  });
   console.log(res);
+  return NextResponse.json(res);
 }

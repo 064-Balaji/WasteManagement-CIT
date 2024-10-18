@@ -79,7 +79,7 @@ model Resource {
   quantity      Int
   productType   String
   providerEmail String
-  image         String[]
-  individual    Individual @relation(references: [email], fields: [providerEmail])
+  image         String?
+  individual    Individual? @relation(references: [email], fields: [providerEmail])
   status        String
 }
