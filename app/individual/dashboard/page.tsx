@@ -1,8 +1,6 @@
-import React from "react";
 import { auth } from "@/auth";
-import { prisma } from "@/prisma/prisma";
-import { redirect } from "next/navigation";
-import ListResource from "./ListResource";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,12 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalendarDays, MapPin, Phone, Mail, Recycle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { prisma } from "@/prisma/prisma";
+import { Mail, MapPin, Phone, Recycle } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import ListResource from "./ListResource";
+import Profile from "./Profile";
 
 const IndividualDashboard = async () => {
   const session = await auth();
@@ -34,12 +33,7 @@ const IndividualDashboard = async () => {
     <div className="container mx-auto p-6 space-y-6">
       <header className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Welcome, {individual.name}!</h1>
-        <Avatar className="h-12 w-12">
-          <AvatarImage
-            src={`https://api.dicebear.com/6.x/initials/svg?seed=${individual.name}`}
-          />
-          <AvatarFallback>{individual.name?.charAt(0)}</AvatarFallback>
-        </Avatar>
+        <Profile individual={individual} />
       </header>
 
       <div className="grid md:grid-cols-3 gap-6">

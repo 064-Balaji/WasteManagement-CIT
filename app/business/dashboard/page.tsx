@@ -15,6 +15,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mail, Phone, MapPin, ShoppingBag, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { signOut } from "next-auth/react";
+import Profile from "./Profile";
 
 const BusinessDashboard = async () => {
   const session = await auth();
@@ -38,12 +45,7 @@ const BusinessDashboard = async () => {
     <div className="container mx-auto p-6 space-y-6">
       <header className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Welcome, {business.name}!</h1>
-        <Avatar className="h-12 w-12">
-          <AvatarImage
-            src={`https://api.dicebear.com/6.x/initials/svg?seed=${business.name}`}
-          />
-          <AvatarFallback>{business.name?.charAt(0)}</AvatarFallback>
-        </Avatar>
+        <Profile individual={business} />
       </header>
 
       <div className="grid md:grid-cols-3 gap-6">
