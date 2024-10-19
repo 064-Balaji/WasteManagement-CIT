@@ -1,7 +1,6 @@
-import React from "react";
 import { auth } from "@/auth";
-import { prisma } from "@/prisma/prisma";
-import { redirect } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,18 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mail, Phone, MapPin, ShoppingBag, Package } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { prisma } from "@/prisma/prisma";
+import { Mail, MapPin, Phone, ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { signOut } from "next-auth/react";
+import { redirect } from "next/navigation";
+import OrderHistory from "./OrderHistory";
 import Profile from "./Profile";
 
 const BusinessDashboard = async () => {
@@ -40,6 +33,14 @@ const BusinessDashboard = async () => {
     where: { recId: session?.user.email! },
     include: { resource: true },
   });
+
+  const handleDeleivery = async (oId: string) => {
+    "use server";
+    await prisma.order.update({
+      where: { id: oId },
+      data: { status: "Completed" },
+    });
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -176,42 +177,7 @@ const BusinessDashboard = async () => {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="orders">
-          <Card>
-            <CardHeader>
-              <CardTitle>Order History</CardTitle>
-              <CardDescription>Track the orders you've placed</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {orders.map((order) => (
-                  <div key={order.id} className="flex items-center space-x-4">
-                    <Package className="h-6 w-6 opacity-70" />
-                    <div className="flex-1">
-                      <p>Product Title: {order.resource.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Status: {order.status} | Pickup on{" "}
-                        {new Date(order.pickupDate).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Price: {order.price}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Note: {order.note}
-                      </p>
-                    </div>
-                    <div>
-                      <img
-                        src={order.resource.image || ""}
-                        className="w-24 h-24"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <OrderHistory orders={orders} handleUpdate={handleDeleivery} />
       </Tabs>
     </div>
   );

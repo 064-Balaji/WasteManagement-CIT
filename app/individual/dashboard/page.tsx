@@ -15,6 +15,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import ListResource from "./ListResource";
 import Profile from "./Profile";
+import ManageOrders from "./ManageOrders";
 
 const IndividualDashboard = async () => {
   const session = await auth();
@@ -28,6 +29,19 @@ const IndividualDashboard = async () => {
   if (!individual) redirect("/");
 
   const listedResources = individual.resource || [];
+
+  const orders = await prisma.order.findMany({
+    where: { proId: session?.user.email! },
+    include: { resource: true, receiver: true },
+  });
+
+  const handleAccept = async (oId: string) => {
+    "use server";
+    await prisma.order.update({
+      where: { id: oId },
+      data: { status: "Accepted" },
+    });
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -100,6 +114,7 @@ const IndividualDashboard = async () => {
         <TabsList>
           <TabsTrigger value="listed">Listed Resources</TabsTrigger>
           <TabsTrigger value="history">Recycling History</TabsTrigger>
+          <TabsTrigger value="orders">Manage Orders</TabsTrigger>
         </TabsList>
         <TabsContent value="listed">
           <Card>
@@ -148,7 +163,7 @@ const IndividualDashboard = async () => {
                         <Badge
                           variant={
                             resource.status === "Collected"
-                              ? "success"
+                              ? "default"
                               : "secondary"
                           }
                         >
@@ -194,6 +209,7 @@ const IndividualDashboard = async () => {
             </CardContent>
           </Card>
         </TabsContent>
+        <ManageOrders orders={orders} handleAccept={handleAccept} />
       </Tabs>
     </div>
   );
