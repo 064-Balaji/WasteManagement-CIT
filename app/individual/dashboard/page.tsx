@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarDays, MapPin, Phone, Mail, Recycle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const IndividualDashboard = async () => {
   const session = await auth();
@@ -115,22 +116,41 @@ const IndividualDashboard = async () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <table className="w-full">
+              <table className="w-full border-collapse border border-gray-300">
                 <thead>
-                  <tr>
-                    <th className="text-left">Name</th>
-                    <th className="text-left">Type</th>
-                    <th className="text-left">Quantity</th>
-                    <th className="text-left">Status</th>
+                  <tr className="bg-gray-200">
+                    <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300">
+                      Name
+                    </th>
+                    <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300">
+                      Type
+                    </th>
+                    <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300">
+                      Quantity
+                    </th>
+                    <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {listedResources.map((resource) => (
-                    <tr key={resource.id}>
-                      <td className="py-2">{resource.name}</td>
-                      <td className="py-2">{resource.productType}</td>
-                      <td className="py-2">{resource.quantity}</td>
-                      <td className="py-2">
+                    <tr
+                      key={resource.id}
+                      className="cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                    >
+                      <td className="py-3 px-4 border-b border-gray-300">
+                        <Link href={`/resource?rId=${resource.id}`} passHref>
+                          {resource.name}
+                        </Link>
+                      </td>
+                      <td className="py-3 px-4 border-b border-gray-300">
+                        {resource.productType}
+                      </td>
+                      <td className="py-3 px-4 border-b border-gray-300">
+                        {resource.quantity}
+                      </td>
+                      <td className="py-3 px-4 border-b border-gray-300">
                         <Badge
                           variant={
                             resource.status === "Collected"

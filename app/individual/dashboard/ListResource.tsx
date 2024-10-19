@@ -51,6 +51,11 @@ export default function ListResource() {
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // New state for user type
+  const [userType, setUserType] = useState<"business" | "individual">(
+    "individual"
+  );
+
   // Handle form input changes
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -102,12 +107,9 @@ export default function ListResource() {
       .getPublicUrl(fileName);
 
     setIsUploading(false);
-
-    console.log(publicUrlData?.publicUrl);
     return publicUrlData?.publicUrl || null;
   };
 
-  // Handle form submission
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,14 +159,19 @@ export default function ListResource() {
         <DialogTrigger asChild>
           <Button className="gap-2">
             <PlusCircle className="w-4 h-4" />
-            Add Resource
+            {userType === "business" ? "Make an Order" : "Add Resource"}
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add Resource</DialogTitle>
+            <DialogTitle>
+              {userType === "business" ? "Make an Order" : "Add Resource"}
+            </DialogTitle>
             <DialogDescription>
-              Fill in the details below to list a new resource.
+              Fill in the details below to{" "}
+              {userType === "business"
+                ? "order a resource."
+                : "list a new resource."}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -223,17 +230,19 @@ export default function ListResource() {
             </div>
 
             {/* Image Upload */}
-            <ImageUploader
-              selectedImage={selectedImage}
-              imagePreview={imagePreview}
-              onFileChange={handleFileChange}
-              onRemove={() => {
-                setSelectedImage(null);
-                setImagePreview(null);
-              }}
-              fileInputRef={fileInputRef}
-              isUploading={isUploading}
-            />
+            {userType !== "business" && (
+              <ImageUploader
+                selectedImage={selectedImage}
+                imagePreview={imagePreview}
+                onFileChange={handleFileChange}
+                onRemove={() => {
+                  setSelectedImage(null);
+                  setImagePreview(null);
+                }}
+                fileInputRef={fileInputRef}
+                isUploading={isUploading}
+              />
+            )}
 
             {/* Form Buttons */}
             <div className="flex justify-end gap-2">
@@ -245,7 +254,7 @@ export default function ListResource() {
                 Cancel
               </Button>
               <Button type="submit" disabled={isUploading}>
-                Submit
+                {userType === "business" ? "Order" : "Submit"}
               </Button>
             </div>
           </form>
@@ -282,8 +291,8 @@ function FormField({
   onChange,
   placeholder,
   required = false,
-  type = "text",
   isTextarea = false,
+  type = "text",
 }: {
   label: string;
   id: string;
@@ -294,8 +303,8 @@ function FormField({
   ) => void;
   placeholder: string;
   required?: boolean;
-  type?: string;
   isTextarea?: boolean;
+  type?: string;
 }) {
   return (
     <div className="space-y-2">
@@ -316,8 +325,8 @@ function FormField({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          type={type}
           required={required}
+          type={type}
         />
       )}
     </div>
@@ -341,40 +350,36 @@ function ImageUploader({
   isUploading: boolean;
 }) {
   return (
-    <div className="space-y-2">
-      <Label>Image Upload</Label>
-      {imagePreview ? (
+    <div className="flex flex-col space-y-2">
+      <Label htmlFor="image">Upload Image</Label>
+      <input
+        type="file"
+        accept="image/*"
+        ref={fileInputRef}
+        onChange={onFileChange}
+        className="hidden"
+      />
+      <Button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isUploading}
+      >
+        {selectedImage ? "Change Image" : "Upload Image"}
+      </Button>
+      {imagePreview && (
         <div className="relative">
           <img
             src={imagePreview}
-            alt="Selected image"
-            className="w-full h-32 object-cover rounded-md"
+            alt="Image Preview"
+            className="h-32 w-full object-cover"
           />
           <Button
             type="button"
-            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full"
             onClick={onRemove}
+            className="absolute top-0 right-0"
           >
-            <X className="h-4 w-4" />
+            <X />
           </Button>
-        </div>
-      ) : (
-        <div className="flex items-center space-x-2">
-          <Button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-          >
-            <Upload className="w-4 h-4" />
-            Upload Image
-          </Button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            accept="image/*"
-            onChange={onFileChange}
-          />
         </div>
       )}
     </div>

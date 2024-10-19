@@ -59,6 +59,7 @@ model Individual {
   city     String
   pinCode  String
   resource Resource[]
+  order    Order[]
 }
 
 model Business {
@@ -70,10 +71,11 @@ model Business {
   city          String
   pinCode       String
   typeofProduct String
+  order         Order[]
 }
 
 model Resource {
-  id            String     @id @default(cuid())
+  id            String      @id @default(cuid())
   name          String
   description   String
   quantity      Int
@@ -82,4 +84,19 @@ model Resource {
   image         String?
   individual    Individual? @relation(references: [email], fields: [providerEmail])
   status        String
+  order         Order[]
+}
+
+model Order {
+  id         String     @id @default(cuid())
+  pickupDate DateTime
+  price      Int
+  resId      String
+  note  String
+  resource   Resource   @relation(references: [id], fields: [resId])
+  proId      String
+  provider   Individual @relation(references: [email], fields: [proId])
+  recId      String
+  receiver   Business   @relation(references: [email], fields: [recId])
+  status String
 }

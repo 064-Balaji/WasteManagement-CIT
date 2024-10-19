@@ -24,9 +24,14 @@ const BusinessDashboard = async () => {
 
   if (!business) redirect("/");
 
-  // Fetch listed products from the database
+  // Fetch listed products and orders from the database
   const listedProducts = await prisma.resource.findMany({
     where: { productType: business.typeofProduct },
+  });
+
+  const orders = await prisma.order.findMany({
+    where: { recId: session?.user.email! },
+    include: { resource: true },
   });
 
   return (
@@ -80,13 +85,16 @@ const BusinessDashboard = async () => {
             <div className="flex justify-between items-center">
               <span>Pending Orders</span>
               <Badge variant="secondary">
-                {listedProducts.filter((p) => p.status === "Pending").length}
+                {
+                  orders.filter((order) => order.status === "In Progress")
+                    .length
+                }
               </Badge>
             </div>
             <div className="flex justify-between items-center">
               <span>Completed Orders</span>
               <Badge variant="secondary">
-                {listedProducts.filter((p) => p.status === "Collected").length}
+                {orders.filter((order) => order.status === "Completed").length}
               </Badge>
             </div>
           </CardContent>
@@ -97,9 +105,11 @@ const BusinessDashboard = async () => {
             <CardTitle>Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Button variant="outline" className="w-full">
-              Browse Available Resources
-            </Button>
+            <Link href={"/resource"}>
+              <Button variant="outline" className="w-full">
+                Browse Available Resources
+              </Button>
+            </Link>
             <Button variant="outline" className="w-full">
               View Pending Orders
             </Button>
@@ -172,24 +182,30 @@ const BusinessDashboard = async () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {listedProducts
-                  .filter((p) => p.status === "Collected")
-                  .map((product) => (
-                    <div
-                      key={product.id}
-                      className="flex items-center space-x-4"
-                    >
-                      <Package className="h-6 w-6 opacity-70" />
-                      <div>
-                        <p className="font-medium">
-                          {product.name} ({product.quantity} items)
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Ordered on {new Date().toLocaleDateString()}
-                        </p>
-                      </div>
+                {orders.map((order) => (
+                  <div key={order.id} className="flex items-center space-x-4">
+                    <Package className="h-6 w-6 opacity-70" />
+                    <div className="flex-1">
+                      <p>Product Title: {order.resource.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Status: {order.status} | Pickup on{" "}
+                        {new Date(order.pickupDate).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Price: {order.price}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Note: {order.note}
+                      </p>
                     </div>
-                  ))}
+                    <div>
+                      <img
+                        src={order.resource.image || ""}
+                        className="w-24 h-24"
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

@@ -38,6 +38,7 @@ export default async function Home() {
           pinCode: formData.pinCode,
         },
       });
+      redirect("/individual/dashboard");
     }
 
     if (userType === "Business") {
@@ -52,6 +53,7 @@ export default async function Home() {
           typeofProduct: formData.businessProductType,
         },
       });
+      redirect("/business/dashboard");
     }
   };
 

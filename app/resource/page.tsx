@@ -1,7 +1,5 @@
-import React from "react";
-import { prisma } from "@/prisma/prisma";
-import { notFound } from "next/navigation";
-import Image from "next/image";
+import { auth } from "@/auth";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -9,9 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { prisma } from "@/prisma/prisma";
+import { Mail, MapPin, Package, Phone, Recycle, User } from "lucide-react";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import PlaceOrder from "./PlaceOrder";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Recycle, Package, User, Phone, Mail, MapPin } from "lucide-react";
 
 const ResourceDetailsPage = async ({
   searchParams,
@@ -19,9 +21,55 @@ const ResourceDetailsPage = async ({
   searchParams: { rId: string };
 }) => {
   const resourceId = searchParams.rId;
+  const session = await auth();
 
   if (!resourceId) {
-    notFound();
+    const business = await prisma.business.findUnique({
+      where: { email: session?.user.email! },
+    });
+    const listedProducts = await prisma.resource.findMany({
+      where: { productType: business?.typeofProduct },
+    });
+
+    return (
+      <table className="w-full">
+        <thead>
+          <tr>
+            <th className="text-left">Name</th>
+            <th className="text-left">Type</th>
+            <th className="text-left">Quantity</th>
+            <th className="text-left">Status</th>
+            <th className="text-left">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {listedProducts
+            .filter((p) => p.status === "pending")
+            .map((product) => (
+              <tr key={product.id}>
+                <td colSpan={5} className="p-0">
+                  <Link
+                    href={`/resource?rId=${product.id}`}
+                    className="block hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="py-2 px-4 grid grid-cols-5 items-center">
+                      <span>{product.name}</span>
+                      <span>{product.productType}</span>
+                      <span>{product.quantity}</span>
+                      <span>
+                        <Badge variant="secondary">{product.status}</Badge>
+                      </span>
+                      <span>
+                        <Button size="sm">View Details</Button>
+                      </span>
+                    </div>
+                  </Link>
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    );
   }
 
   const resource = await prisma.resource.findUnique({
@@ -32,6 +80,14 @@ const ResourceDetailsPage = async ({
   if (!resource) {
     notFound();
   }
+
+  const indi = await prisma.individual.findUnique({
+    where: { email: session?.user.email! },
+  });
+
+  const buis = await prisma.business.findUnique({
+    where: { email: session?.user.email! },
+  });
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -106,10 +162,13 @@ const ResourceDetailsPage = async ({
         </CardContent>
       </Card>
 
-      <div className="flex justify-end space-x-4">
-        <Button variant="outline">Contact Provider</Button>
-        <Button>Place Order</Button>
-      </div>
+      {buis && (
+        <PlaceOrder
+          resourceId={resourceId}
+          proId={resource.providerEmail}
+          recId={session?.user.email!}
+        />
+      )}
     </div>
   );
 };
